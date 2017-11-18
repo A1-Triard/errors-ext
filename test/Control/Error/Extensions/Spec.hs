@@ -19,7 +19,6 @@ module Control.Error.Extensions.Spec
   ) where
 
 import Test.HUnit.Base hiding (Label)
-import Test.HUnit.Text
 import Control.Error.Extensions
 import Control.Exception
 import Control.Monad.Trans.Class
