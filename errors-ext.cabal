@@ -16,7 +16,7 @@ cabal-version: >=1.10
 library
   hs-source-dirs: src
   exposed-modules: Control.Error.Extensions
-  ghc-options: -fmax-pmcheck-iterations=100000000 -O2 -Wall -Werror -fprint-potential-instances
+  ghc-options: -fmax-pmcheck-iterations=100000000 -O -Wall -Werror -fprint-potential-instances
   build-depends: base >= 4.7 && < 5
                , errors
                , transformers
@@ -27,7 +27,7 @@ test-suite errors-ext-test
   hs-source-dirs: test
   main-is: Spec.hs
   other-modules: Control.Error.Extensions.Spec
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fmax-pmcheck-iterations=100000000 -O2 -Wall -Werror -fprint-potential-instances
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fmax-pmcheck-iterations=100000000 -O -Wall -Werror -fprint-potential-instances
   build-depends: base
                , HUnit
                , errors-ext
