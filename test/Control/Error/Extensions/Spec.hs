@@ -9,7 +9,7 @@ import Control.Error.Extensions
 tests :: Test
 tests = TestList $ (TestCase . runBracketTest) <$> bracketTests
 
-data Resource = Resource { acquired :: !Bool, processed :: !Bool, released :: !Bool } deriving (Eq, Show)
+data Resource = Resource { acquired :: !Bool, released :: !Bool, processed :: !Bool } deriving (Eq, Show)
 
 resource :: IO (IORef Resource)
 resource = newIORef $ Resource False False False
@@ -32,6 +32,12 @@ type Release = IORef Resource -> ExceptT String IO ()
 releaseOk :: Release
 releaseOk r = lift $ modifyIORef' r $ \x -> x { released = True }
 
+releaseEx :: Release
+releaseEx _ = lift $ fail "releaseEx"
+
+releaseEr :: Release
+releaseEr _ = throwE "releaseEr"
+
 type Process = IORef Resource -> ExceptT String IO Resource
 
 processOk :: Process
@@ -39,6 +45,12 @@ processOk r = lift $ do
   v <- readIORef r
   modifyIORef' r $ \x -> x { processed = True }
   return v
+
+processEx :: Process
+processEx _ = lift $ fail "processEx"
+
+processEr :: Process
+processEr _ = throwE "processEr"
 
 data Error = Error { isException :: !Bool, message :: !String } deriving (Eq, Show)
 
@@ -57,6 +69,14 @@ bracketTests =
   [ TestData "1" acquireOk releaseOk processOk (Resource True True True, Right $ Resource True False False)
   , TestData "2" acquireEx releaseOk processOk (Resource False False False, Left $ Error { isException = True, message = "acquireEx" })
   , TestData "3" acquireEr releaseOk processOk (Resource False False False, Left $ Error { isException = False, message = "acquireEr" })
+  , TestData "4" acquireOk releaseEx processOk (Resource True False True, Left $ Error { isException = True, message = "releaseEx" })
+  , TestData "5" acquireOk releaseEr processOk (Resource True False True, Left $ Error { isException = False, message = "releaseEr" })
+  , TestData "6" acquireOk releaseOk processEx (Resource True True False, Left $ Error { isException = True, message = "processEx" })
+  , TestData "7" acquireOk releaseOk processEr (Resource True True False, Left $ Error { isException = False, message = "processEr" })
+  , TestData "8" acquireOk releaseEx processEx (Resource True False False, Left $ Error { isException = True, message = "processEx" })
+  , TestData "9" acquireOk releaseEr processEx (Resource True False False, Left $ Error { isException = True, message = "processEx" })
+  , TestData "10" acquireOk releaseEx processEr (Resource True False False, Left $ Error { isException = False, message = "processEr" })
+  , TestData "11" acquireOk releaseEr processEr (Resource True False False, Left $ Error { isException = False, message = "processEr" })
   ]
 
 runBracketTest :: TestData -> Assertion
