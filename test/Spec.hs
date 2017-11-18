@@ -1,2 +1,11 @@
+#define TESTS
+#include <haskell>
+import qualified Control.Error.Extensions.Spec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = void $ runTestTT tests
+
+tests :: Test
+tests = TestList
+  [ Control.Error.Extensions.Spec.tests
+  ]
