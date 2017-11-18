@@ -14,6 +14,18 @@
 -- limitations under the License.
 --
 
+-- |
+-- Module      : Control.Error.Extensions
+-- Copyright   : (c) 2007 Warlock <internalmike@gmail.com>
+--
+-- License     : Apache
+-- Maintainer  : internalmike@gmail.com
+-- Stability   : experimental
+-- Portability : GHC
+--
+-- A bracket function for ExceptT over IO monad.
+--
+
 module Control.Error.Extensions
   ( bracketE
   , bracketE_
@@ -25,7 +37,7 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
 
--- | Analogous to 'bracket', but for ExceptT over IO.
+-- | Analogous to 'bracket', but for 'ExceptT' over 'IO'.
 bracketE :: ExceptT e IO a -> (a -> ExceptT e IO b) -> (a -> ExceptT e IO c) -> ExceptT e IO c
 bracketE acquire release action = (hoistEither =<<) $ lift $ do
   resource <- runExceptT acquire
