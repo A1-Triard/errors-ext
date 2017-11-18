@@ -14,16 +14,7 @@
 -- limitations under the License.
 --
 
--- |
--- Module      : Control.Error.Extensions
--- Copyright   : (c) 2007 Warlock <internalmike@gmail.com>
---
--- License     : Apache
--- Maintainer  : internalmike@gmail.com
--- Stability   : experimental
--- Portability : GHC
---
--- A bracket function for 'ExceptT' over 'IO' monad.
+-- | This module exports bracket-like functions for 'ExceptT' over 'IO' monad.
 --
 
 module Control.Error.Extensions
