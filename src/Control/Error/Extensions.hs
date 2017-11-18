@@ -23,7 +23,7 @@
 -- Stability   : experimental
 -- Portability : GHC
 --
--- A bracket function for ExceptT over IO monad.
+-- A bracket function for 'ExceptT' over 'IO' monad.
 --
 
 module Control.Error.Extensions
