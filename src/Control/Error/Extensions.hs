@@ -3,7 +3,11 @@ module Control.Error.Extensions
   , bracketE_
   ) where
 
-#include <haskell>
+import Control.Error.Util
+import Control.Exception
+import Control.Monad
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except
 
 -- | Analogous to 'bracket', but for ExceptT over IO.
 bracketE :: ExceptT e IO a -> (a -> ExceptT e IO b) -> (a -> ExceptT e IO c) -> ExceptT e IO c

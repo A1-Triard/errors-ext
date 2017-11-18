@@ -2,9 +2,14 @@ module Control.Error.Extensions.Spec
   ( tests
   ) where
 
-#define TESTS
-#include <haskell>
+import Test.HUnit.Base hiding (Label)
+import Test.HUnit.Text
 import Control.Error.Extensions
+import Control.Exception
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except
+import Data.IORef
+import System.IO.Error
 
 tests :: Test
 tests = TestList $ (TestCase . runBracketTest) <$> bracketTests
