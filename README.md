@@ -1,1 +1,1 @@
-# errors-ext
+A bracket function for `ExceptT` over `IO` monad.
