@@ -14,7 +14,7 @@
 -- limitations under the License.
 --
 
--- | This module exports bracket-like functions for 'ExceptT' over 'IO' monad.
+-- | This module exports bracket-like functions for 'ExceptT'.
 --
 
 module Control.Error.Extensions
@@ -23,21 +23,21 @@ module Control.Error.Extensions
   ) where
 
 import Control.Error.Util
-import Control.Exception
 import Control.Monad
+import Control.Monad.Catch
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
 
--- | Analogous to 'bracket', but for 'ExceptT' over 'IO'.
-bracketE :: ExceptT e IO a -> (a -> ExceptT e IO b) -> (a -> ExceptT e IO c) -> ExceptT e IO c
+-- | Analogous to 'bracket', but for 'ExceptT' over 'IO' (or any 'MonadMask' monad).
+bracketE :: MonadMask m => ExceptT e m a -> (a -> ExceptT e m b) -> (a -> ExceptT e m c) -> ExceptT e m c
 bracketE acquire release action = (hoistEither =<<) $ lift $ do
   resource <- runExceptT acquire
-  result <- bracketOnError (return resource) (handleAll . ioRelease) ioAction
+  result <- bracketOnError (return resource) (ignoreAll . ioRelease) ioAction
   if isLeft result
-    then handleAll (ioRelease resource) >> return result
+    then ignoreAll (ioRelease resource) >> return result
     else caseResult result <$> ioRelease resource
   where
-    handleAll = handle (\x -> let _ = x :: SomeException in return ()) . void
+    ignoreAll = handleAll (const $ return ()) . void
     ioAction (Left e) = return $ Left e
     ioAction (Right r) = runExceptT $ action r
     ioRelease (Left e) = return $ Left e
@@ -47,5 +47,5 @@ bracketE acquire release action = (hoistEither =<<) $ lift $ do
     caseResult (Right r) (Right _) = Right r
 
 -- | A variant of 'bracketE' where the return value from the first computation is not required.
-bracketE_ :: ExceptT e IO a -> ExceptT e IO b -> ExceptT e IO c -> ExceptT e IO c
+bracketE_ :: MonadMask m => ExceptT e m a -> ExceptT e m b -> ExceptT e m c -> ExceptT e m c
 bracketE_ acquire release action = bracketE acquire (const release) (const action)

@@ -1,5 +1,5 @@
 name: errors-ext
-version: 0.1.4
+version: 0.2
 synopsis: Bracket-like functions for ExceptT over IO monad.
 description: Bracket-like functions for ExceptT over IO monad.
 homepage: https://github.com/A1-Triard/errors-ext#readme
@@ -19,6 +19,7 @@ library
   ghc-options: -fmax-pmcheck-iterations=100000000 -Wall -fprint-potential-instances
   build-depends: base >= 4.7 && < 5
                , errors
+               , exceptions
                , transformers
   default-language: Haskell2010
 
@@ -32,6 +33,7 @@ test-suite errors-ext-test
                , HUnit
                , errors-ext
                , errors
+               , exceptions
                , transformers
   default-language: Haskell2010
 

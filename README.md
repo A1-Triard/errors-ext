@@ -1,1 +1,1 @@
-A bracket function for `ExceptT` over `IO` monad.
+A bracket function for `ExceptT`.
