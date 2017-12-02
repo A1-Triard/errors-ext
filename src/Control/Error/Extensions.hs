@@ -45,7 +45,9 @@ bracketE acquire release action = (hoistEither =<<) $ lift $ do
     caseResult (Left e) _ = Left e
     caseResult (Right _) (Left e) = Left e
     caseResult (Right r) (Right _) = Right r
+{-# INLINE bracketE #-}
 
 -- | A variant of 'bracketE' where the return value from the first computation is not required.
 bracketE_ :: MonadMask m => ExceptT e m a -> ExceptT e m b -> ExceptT e m c -> ExceptT e m c
 bracketE_ acquire release action = bracketE acquire (const release) (const action)
+{-# INLINE bracketE_ #-}
