@@ -1,5 +1,5 @@
 name: errors-ext
-version: 0.4.1
+version: 0.4.2
 synopsis: `bracket`-like functions for `ExceptT` over `IO` monad.
 description: `bracket`-like functions for `ExceptT` over `IO` monad.
 homepage: https://github.com/A1-Triard/errors-ext#readme
