@@ -28,7 +28,8 @@ import Control.Monad.Catch
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
 
--- | Analogous to 'Control.Exception.bracket', but for 'ExceptT' over 'IO' (or any 'MonadMask' monad).
+-- | Analogous to 'Control.Exception.bracket', but for 'ExceptT' over 'IO'
+-- (or 'ExceptT' over any 'Control.Monad.Catch.MonadMask' monad).
 bracketE :: MonadMask m => ExceptT e m a -> (a -> ExceptT e m b) -> (a -> ExceptT e m c) -> ExceptT e m c
 bracketE acquire release action = (hoistEither =<<) $ lift $ do
   resource <- runExceptT acquire
