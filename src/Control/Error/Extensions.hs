@@ -14,7 +14,7 @@
 -- limitations under the License.
 --
 
--- | This module exports 'bracket'-like functions for 'ExceptT'.
+-- | This module exports 'bracket'-like functions for @'Control.Monad.Trans.Except.ExceptT' e 'IO'@.
 
 module Control.Error.Extensions
   ( bracketE
@@ -43,7 +43,8 @@ runErrorM a = catchError (Right <$> a) (return . Left)
 errorM :: MonadError e m => m (Either e a) -> m a
 errorM = (either throwError return =<<)
 
--- | Analogous to 'bracket', but for @'ExceptT' e 'IO'@ (or any 'MonadError' allowing 'bracket' lifting).
+-- | Analogous to 'bracket', but for @'Control.Monad.Trans.Except.ExceptT' e 'IO'@
+-- (or any 'MonadError' allowing 'bracket' lifting).
 bracketE :: (MonadBaseControl IO m, MonadError e m) => m a -> (a -> m b) -> (a -> m c) -> m c
 bracketE acquire release action = errorM $ do
   resource <- runErrorM acquire
