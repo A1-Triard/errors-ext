@@ -14,41 +14,55 @@
 -- limitations under the License.
 --
 
--- | This module exports bracket-like functions for 'ExceptT'.
---
+-- | This module exports 'bracket'-like functions for 'ExceptT'.
 
 module Control.Error.Extensions
   ( bracketE
   , bracketE_
   ) where
 
+import Control.Exception
 import Control.Error.Util
 import Control.Monad
-import Control.Monad.Catch
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Except
+import Control.Monad.Catch (handleAll)
+import Control.Monad.Error.Class
+import Control.Monad.Trans.Control
+import Control.Monad.Trans.Except ()
 
--- | Analogous to 'Control.Exception.bracket', but for 'ExceptT' over 'IO'
--- (or 'ExceptT' over any 'MonadMask' monad).
-bracketE :: MonadMask m => ExceptT e m a -> (a -> ExceptT e m b) -> (a -> ExceptT e m c) -> ExceptT e m c
-bracketE acquire release action = (hoistEither =<<) $ lift $ do
-  resource <- runExceptT acquire
-  result <- bracketOnError (return resource) (ignoreAll . ioRelease) ioAction
+liftedBracketOnError :: MonadBaseControl IO m => m a -> (a -> m b) -> (a -> m c) -> m c
+liftedBracketOnError acquire release action = control $ \run ->
+  bracketOnError (run acquire) (\saved -> run (restoreM saved >>= release)) (\saved -> run (restoreM saved >>= action))
+
+liftedHandleAll :: MonadBaseControl IO m => (SomeException -> m a) -> m a -> m a
+liftedHandleAll handler action = control $ \run ->
+  handleAll (run . handler) (run action)
+
+runErrorM :: MonadError e m => m a -> m (Either e a)
+runErrorM a = catchError (Right <$> a) (return . Left)
+
+errorM :: MonadError e m => m (Either e a) -> m a
+errorM = (either throwError return =<<)
+
+-- | Analogous to 'bracket', but for @'ExceptT' e 'IO'@ (or any 'MonadError' allowing 'bracket' lifting).
+bracketE :: (MonadBaseControl IO m, MonadError e m) => m a -> (a -> m b) -> (a -> m c) -> m c
+bracketE acquire release action = errorM $ do
+  resource <- runErrorM acquire
+  result <- liftedBracketOnError (return resource) (ignoreAll . ioRelease) ioAction
   if isLeft result
     then ignoreAll (ioRelease resource) >> return result
     else caseResult result <$> ioRelease resource
   where
-    ignoreAll = handleAll (const $ return ()) . void
+    ignoreAll = liftedHandleAll (const $ return ()) . void
     ioAction (Left e) = return $ Left e
-    ioAction (Right r) = runExceptT $ action r
+    ioAction (Right r) = runErrorM $ action r
     ioRelease (Left e) = return $ Left e
-    ioRelease (Right r) = runExceptT $ release r
+    ioRelease (Right r) = runErrorM $ release r
     caseResult (Left e) _ = Left e
     caseResult (Right _) (Left e) = Left e
     caseResult (Right r) (Right _) = Right r
 {-# INLINE bracketE #-}
 
 -- | A variant of 'bracketE' where the return value from the first computation is not required.
-bracketE_ :: MonadMask m => ExceptT e m a -> ExceptT e m b -> ExceptT e m c -> ExceptT e m c
+bracketE_ :: (MonadBaseControl IO m, MonadError e m) => m a -> m b -> m c -> m c
 bracketE_ acquire release action = bracketE acquire (const release) (const action)
 {-# INLINE bracketE_ #-}
