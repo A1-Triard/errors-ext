@@ -32,16 +32,20 @@ import Control.Monad.Trans.Except ()
 liftedBracketOnError :: MonadBaseControl IO m => m a -> (a -> m b) -> (a -> m c) -> m c
 liftedBracketOnError acquire release action = control $ \run ->
   bracketOnError (run acquire) (\saved -> run (restoreM saved >>= release)) (\saved -> run (restoreM saved >>= action))
+{-# INLINE liftedBracketOnError #-}
 
 liftedHandleAll :: MonadBaseControl IO m => (SomeException -> m a) -> m a -> m a
 liftedHandleAll handler action = control $ \run ->
   handleAll (run . handler) (run action)
+{-# INLINE liftedHandleAll #-}
 
 runErrorM :: MonadError e m => m a -> m (Either e a)
 runErrorM a = catchError (Right <$> a) (return . Left)
+{-# INLINE runErrorM #-}
 
 errorM :: MonadError e m => m (Either e a) -> m a
 errorM = (either throwError return =<<)
+{-# INLINE errorM #-}
 
 -- | Analogous to 'bracket', but for @'Control.Monad.Trans.Except.ExceptT' e 'IO'@
 -- (or any 'MonadError' allowing 'bracket' lifting).
