@@ -12,9 +12,17 @@ The following example demonstartes a typical use-case. It is a program which rea
 and produces a new file with every number replaced by its natural predecessor. The program deals with two kinds of errors:
 I/O errors, and out-of-valid-range value in input sequence.
 
-```
+```haskell
 {- errors-ext-example.hs -}
-{- Compile: ghc errors-ext-example.hs -package errors-ext -package binary-ext -package conduit -package bytestring -package mtl -package monad-loops -package errors -}
+{- Compile: ghc errors-ext-example.hs \
+                -package binary-ext \
+                -package bytestring \
+                -package conduit \
+                -package errors \
+                -package errors-ext \
+                -package monad-loops \
+                -package mtl
+-}
 
 {-# LANGUAGE BangPatterns #-}
 
