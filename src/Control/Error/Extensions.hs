@@ -1,5 +1,5 @@
 --
--- Copyright 2017 Warlock <internalmike@gmail.com>
+-- Copyright 2017, 2018 Warlock <internalmike@gmail.com>
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@
 module Control.Error.Extensions
   ( bracketE
   , bracketE_
+  , eitherMaybe
+  , maybeEither
+  , eitherVoidL
+  , eitherVoidR
   ) where
 
 import Control.Exception
@@ -28,6 +32,7 @@ import Control.Monad.Catch (handleAll)
 import Control.Monad.Error.Class
 import Control.Monad.Trans.Control
 import Control.Monad.Trans.Except ()
+import Data.Void
 
 liftedBracketOnError :: MonadBaseControl IO m => m a -> (a -> m b) -> (a -> m c) -> m c
 liftedBracketOnError acquire release action = control $ \run ->
@@ -71,3 +76,28 @@ bracketE acquire release action = errorM $ do
 bracketE_ :: (MonadBaseControl IO m, MonadError e m) => m a -> m b -> m c -> m c
 bracketE_ acquire release action = bracketE acquire (const release) (const action)
 {-# INLINE bracketE_ #-}
+
+-- | Converts 'Maybe' to 'Either'. Specialization of 'maybe'.
+--
+-- @maybeEither . 'eitherMaybe' = 'id'@
+maybeEither :: Maybe a -> Either () a
+maybeEither = maybe (Left ()) Right
+{-# INLINE maybeEither #-}
+
+-- | Converts 'Either' to 'Maybe'. Specialization of 'either'.
+--
+-- @'maybeEither' . eitherMaybe = 'id'@
+eitherMaybe :: Either () a -> Maybe a
+eitherMaybe = either (const Nothing) Just
+{-# INLINE eitherMaybe #-}
+
+
+-- | Removes right zero term from sum type. Specialization of 'either'.
+eitherVoidR :: Either a Void -> a
+eitherVoidR = either id absurd
+{-# INLINE eitherVoidR #-}
+
+-- | Removes left zero term from sum type. Specialization of 'either'.
+eitherVoidL :: Either Void a -> a
+eitherVoidL = either absurd id
+{-# INLINE eitherVoidL #-}

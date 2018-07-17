@@ -1,5 +1,5 @@
 name: errors-ext
-version: 0.4.2
+version: 0.4.3
 synopsis: "`bracket`-like functions for `ExceptT` over `IO` monad."
 description: "`bracket`-like functions for `ExceptT` over `IO` monad."
 github: "A1-Triard/errors-ext"
@@ -41,3 +41,10 @@ tests:
     dependencies:
     - HUnit
     - errors-ext
+    - binary-ext >= 2.0.4
+    - bytestring
+    - conduit
+    - monad-loops
+    default-extensions:
+    - BangPatterns
+    - OverloadedStrings
